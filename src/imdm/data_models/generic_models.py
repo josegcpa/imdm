@@ -70,12 +70,20 @@ class DataValidator:
 
     def __post_init__(self):
         self._test_dict = {
-            "type": (self.check_type, "preprocessed_data"),
-            "length": (self.check_length, "values"),
-            "shape": (self.check_shape, "values"),
-            "range": (self.check_range, "values"),
-            "dtype": (self.check_dtype, "dtype")}
+            "raw":{},
+            "preprocessed_data":{
+                "type": self.check_type
+            },
+            "values":{
+                "length": self.check_length,
+                "shape": self.check_shape,
+                "range": self.check_range,
+                "dtype": self.check_dtype
+            },
+            
+        }
 
+        self.test_names = ["type","length","shape","range","dtype"]
         self.logger = logging.getLogger('data_validator')
         self.logger.setLevel(self.verbose)
     
@@ -123,18 +131,26 @@ class DataValidator:
                 a boolean (True or False).
             data_stage (str): data stage for the application of this test.
         """
-        if key in self._test_dict:
-            self.logger.warning(
-                "test_dict already contains this key, replacing...")
-        self._test_dict[key] = (test_fn, data_stage)
+        if key in self.test_names:
+            raise ValueError(f"'{key}' test is already defined")
+        self._test_dict[data_stage][key] = (test_fn)
     
-    def remove_test(self,key: str):
+    def remove_test(self, key: str, data_stage: str=None):
         """Removes a test.
 
         Args:
             key (str): key of the test to be removed.
+            data_stage (str, optional): data stage at which the test is 
+                performed. Defaults to None (removes any instances of key).
         """
-        del self._test_dict[key]
+        if data_stage is not None:
+            del self._test_dict[data_stage][key]
+        else:
+            for data_stage in self._test_dict:
+                if key in self.test_dict[data_stage]:
+                    del self.test_dict[data_stage][key]
+        if key in self.test_names:
+            self.test_names.remove(key)
         
     def check_dtype(self, data: Any) -> Union[bool,None]:
         """Tests whether ``data.dtype`` is the same as ``self.dtype``.
@@ -216,34 +232,51 @@ class DataValidator:
                     check = False
             return check
     
-    def validate(self, data: Any) -> Dict[str,Union[bool,None]]:
-        """Runs all of the tests in test_dict on the input data.
+    def validate(self, 
+                 data: Any, 
+                 strict: bool=True) -> Dict[str,Union[bool,None]]:
+        """Runs all of the tests in test_dict on the input data. Tests are 
+        performed sequentially by data stages and execution halts if a test
+        in the previous stage fails. To avoid this behaviour, set ``strict``
+        to ``True``.
 
         Args:
             data (Any): input data.
+            strict (bool, optional): requires that tests at a previous stage
+                succeed (no ``False`` values) to execute the next stages. 
+                Defaults to ``True``.
 
         Returns:
             Dict[str,Union[bool,None]]: a dictionary where the keys are the 
                 same as those in ``test_dict`` and the values are the result of
                 the checks.
         """
-        if self.preprocess_fn is not None:
-            preprocessed_data = self.preprocess_fn(data)
-        else:
-            preprocessed_data = data
-        if self.values_fn is not None:
-            values_data = self.values_fn(preprocessed_data)
-        else:
-            values_data = preprocessed_data
-        validation_dict = {}
-        for k in self.test_dict:
-            test,data_stage = self.test_dict[k]
-            if data_stage == "raw":
-                validation_dict[k] = test(data)
-            elif data_stage == "preprocessed_data":
-                validation_dict[k] = test(preprocessed_data)
-            elif data_stage == "values":
-                validation_dict[k] = test(values_data)
+        stop = False
+        validation_dict = {k:None for k in self.test_names}
+        for k in self.test_dict["raw"]:
+            result = self.test_dict["raw"][k](data)
+            if result == False:
+                stop = True
+            validation_dict[k] = result
+
+        if (stop is False) or (strict is False):
+            if self.preprocess_fn is not None:
+                data = self.preprocess_fn(data)
+            for k in self.test_dict["preprocessed_data"]:
+                result = self.test_dict["preprocessed_data"][k](data)
+                if result == False:
+                    stop = True
+                validation_dict[k] = result
+
+        if (stop is False) or (strict is False):
+            if self.values_fn is not None:
+                data = self.values_fn(data)
+            for k in self.test_dict["values"]:
+                result = self.test_dict["values"][k](data)
+                if result == False:
+                    stop = True
+                validation_dict[k] = result
+
         return validation_dict
 
 DataValidationStructure = Union[
