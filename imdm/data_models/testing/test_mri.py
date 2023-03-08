@@ -1,4 +1,4 @@
-from ..mri_specific_structures import DicomFile,SitkFile
+from ..image_specific_structures import DicomFile,SitkFile
 
 test_dcm_path = "test_data/MRBRAIN.dcm"
 test_sitk_path = "test_data/CT_Philips.nii.gz"

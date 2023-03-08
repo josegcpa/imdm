@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 """
 Generic data types and classes used to construct data models to be used in data
 validation.
@@ -107,19 +110,19 @@ class DataValidator:
         else:
             super().__setattr__(attr, value)
 
-    def add_test(self, key: str, test_fn: Callable, data_type: str):
+    def add_test(self, key: str, test_fn: Callable, data_stage: str):
         """Adds a test to the test dictionary.
 
         Args:
             key (str): name of the dictionary.
             test_fn (Callable): function corresponding to the test. Must return
                 a boolean (True or False).
-            data_type (str): data stage for the application of this test.
+            data_stage (str): data stage for the application of this test.
         """
         if key in self._test_dict:
             self.logger.warning(
                 "test_dict already contains this key, replacing...")
-        self._test_dict[key] = (test_fn, data_type)
+        self._test_dict[key] = (test_fn, data_stage)
     
     def remove_test(self,key: str):
         """Removes a test.
@@ -216,12 +219,12 @@ class DataValidator:
             values_data = preprocessed_data
         validation_dict = {}
         for k in self.test_dict:
-            test,data_type = self.test_dict[k]
-            if data_type == "raw":
+            test,data_stage = self.test_dict[k]
+            if data_stage == "raw":
                 validation_dict[k] = test(data)
-            elif data_type == "preprocessed_data":
+            elif data_stage == "preprocessed_data":
                 validation_dict[k] = test(preprocessed_data)
-            elif data_type == "values":
+            elif data_stage == "values":
                 validation_dict[k] = test(values_data)
         return validation_dict
     
