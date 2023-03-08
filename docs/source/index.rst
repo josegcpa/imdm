@@ -20,4 +20,11 @@ What's the point
 This module contains a few helpful and flexible data models which can be
 easily extended for other applications. Here, I focused on making some
 (very) specific validators focusing on MRI data. These can be used to
-test DICOM files, SITK-readable images or numpy-loadable arrays.
+test DICOM files, SITK-readable images or numpy-loadable arrays. Other 
+image formats (PNG, JPEG, GIF, etc.) are also supported through PIL. This
+package is supposed to help researchers and developers quickly test 
+whether or not a given object or file is compatible with their pipeline.
+
+We are, at the moment, not planning on including any more checks, placing
+the "burden" of developing novel validators and models on users who like
+our flexible ``DataValidator`` and ``DataModel`` classes.

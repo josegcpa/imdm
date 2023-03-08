@@ -44,7 +44,7 @@ whether a given path exists:
    >>> {"type":True,"length":True,"shape":None,"range":None,"path":False}
 
 Easy! All arguments are relatively clear, but ``data_stage`` is somewhat
-more ellusive; for this reason I introduce here the concept of three
+more ellusive; for this reason we introduce here the concept of three
 data stages:
 
 -  ``raw`` - the input exactly as it is. This is useful to test whether
@@ -84,10 +84,10 @@ MRI- and image-specific data validators
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 An easy-to-use data validators have been implemented specifically for
-image data (``ImageFile``). I work with images, so these were especially
+image data (``ImageFile``). We work with images, so these were especially
 useful for me.
 
-Additionally, since I work with a lot of MRI data, specific methods for
+Additionally, since we work with a lot of MRI data, specific methods for
 MRI data were also implemented (``DicomFile`` and ``SitkFile``). A more
 generic method for ``numpy`` files has also been (``NumpyFile``).
 
