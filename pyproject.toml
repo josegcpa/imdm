@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "mri-data-models"
+version = "0.1.0"
+license = "MIT"
+description = "Data models for input/output validation in MRI applications"
+authors = ["josegcpa <jose.almeida@research.fchampalimaud.org>"]
+readme = "README.md"
+packages = [{include = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+simpleitk = "^2.2.1"
+pydicom = "^2.3.1"
+pytest = "^7.2.2"
+numpy = "^1.24.2"
+termcolor = "^2.2.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
