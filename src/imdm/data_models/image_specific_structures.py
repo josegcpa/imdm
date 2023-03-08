@@ -21,7 +21,7 @@ from .generic_models import DataValidator
 from typing import Sequence,Tuple,Union
 
 def dicom_to_array(dcm_dataset: pydicom.dataset.FileDataset) -> np.ndarray:
-    """Converts a `pydicom` `FileDataset` into a numpy array by accessing its
+    """Converts a ``pydicom`` ``FileDataset`` into a numpy array by accessing its
     pixel_array attribute.
 
     Args:
@@ -46,7 +46,7 @@ def sitk_to_array(sitk_image: sitk.SimpleITK.Image) -> np.ndarray:
 
 @dataclass
 class DicomFile(DataValidator):
-    """DICOM file data validator. Expects as input to the `validate` method
+    """DICOM file data validator. Expects as input to the ``validate`` method
     a path to a given file.
 
     Args:
@@ -71,7 +71,7 @@ class DicomFile(DataValidator):
 
 @dataclass
 class SitkFile(DataValidator):
-    """SITK file data validator. Expects as input to the `validate` method
+    """SITK file data validator. Expects as input to the ``validate`` method
     a path to a given file.
 
     Args:
@@ -96,7 +96,7 @@ class SitkFile(DataValidator):
 
 @dataclass
 class NumpyFile(DataValidator):
-    """Numpy file data validator. Expects as input to the `validate` method
+    """Numpy file data validator. Expects as input to the ``validate`` method
     a path to a given file.
 
     Args:
@@ -120,7 +120,7 @@ class NumpyFile(DataValidator):
 
 @dataclass
 class ImageFile(DataValidator):
-    """Image file data validator. Expects as input to the `validate` method
+    """Image file data validator. Expects as input to the ``validate`` method
     a path to a given file.
 
     Args:
