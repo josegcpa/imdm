@@ -5,7 +5,6 @@ license = "MIT"
 description = "Data models for MRI and image applications"
 authors = ["josegcpa <jose.almeida@research.fchampalimaud.org>"]
 readme = "README.md"
-packages = [{include = "imdm"}]
 
 [tool.poetry.dependencies]
 python = "^3.9"
