@@ -1,4 +1,4 @@
-# `imdm` - Python data models for image
+# `imdm` - Python data models for images (and other stuff!)
 
 ## What's the point
 
