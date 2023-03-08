@@ -14,6 +14,7 @@ pydicom = "^2.3.1"
 pytest = "^7.2.2"
 numpy = "^1.24.2"
 termcolor = "^2.2.0"
+ruff = "^0.0.254"
 
 
 [build-system]

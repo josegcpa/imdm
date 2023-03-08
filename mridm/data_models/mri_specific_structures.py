@@ -47,3 +47,5 @@ class SitkFile(DataValidator):
         self.type = sitk.SimpleITK.Image
         self.preprocess_fn = sitk.ReadImage
         self.values_fn = sitk_to_array
+
+        self.add_test("path",os.path.exists,"raw")
