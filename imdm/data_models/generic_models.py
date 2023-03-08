@@ -50,6 +50,8 @@ class DataValidator:
             Defaults to None.
         range (Tuple[Union[int,float],Union[int,float]], optional): checks if 
             data is within a given range. Defaults to None.
+        dtype (Any, optional): checks if data has a specific data type (as 
+            determined by `data.dtype`). Defaults to None.
         preprocess_fn (Callable, optional): preprocessing function. Defaults to
             None (no preprocessing).
         values_fn (Callable, optional): function to extract values from 
@@ -61,6 +63,7 @@ class DataValidator:
     length: int = None
     shape: Sequence[int] = None
     range: Tuple[Union[int,float],Union[int,float]] = None
+    dtype: Any = None
     preprocess_fn: Callable = None
     values_fn: Callable = None
     verbose: int = logging.WARNING
@@ -70,7 +73,8 @@ class DataValidator:
             "type": (self.check_type, "preprocessed_data"),
             "length": (self.check_length, "values"),
             "shape": (self.check_shape, "values"),
-            "range": (self.check_range, "values")}
+            "range": (self.check_range, "values"),
+            "dtype": (self.check_dtype, "dtype")}
 
         self.logger = logging.getLogger('data_validator')
         self.logger.setLevel(self.verbose)
@@ -131,6 +135,20 @@ class DataValidator:
             key (str): key of the test to be removed.
         """
         del self._test_dict[key]
+        
+    def check_dtype(self, data: Any) -> Union[bool,None]:
+        """Tests whether `data.dtype` is the same as `self.dtype`.
+
+        Args:
+            data (Any): input data.
+
+        Returns:
+            Union[bool,None]: boolean if `self.dtype` is defined (True if 
+                data.dtype == self.dtype and False otherwise). None if 
+                self.dtype is None.
+        """
+        if self.dtype is not None:
+            return data.dtype == self.type
     
     def check_type(self, data: Any) -> Union[bool,None]:
         """Tests whether `type(data)` is the same as `self.type`.
@@ -227,7 +245,7 @@ class DataValidator:
             elif data_stage == "values":
                 validation_dict[k] = test(values_data)
         return validation_dict
-    
+
 DataValidationStructure = Union[
     Sequence[DataValidator],
     Dict[str,DataValidator]]
