@@ -5,11 +5,6 @@
 MRI-specific data models.
 """
 
-__author__ = "José Guilherme de Almeida"
-__version__ = "0.1.0"
-__license__ = "MIT"
-__email__ = "jose.gcp.almeida@gmail.com"
-
 import os
 import numpy as np
 import pydicom

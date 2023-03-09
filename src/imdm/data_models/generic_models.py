@@ -6,11 +6,6 @@ Generic data types and classes used to construct data models to be used in data
 validation.
 """
 
-__author__ = "José Guilherme de Almeida"
-__version__ = "0.1.0"
-__license__ = "MIT"
-__email__ = "jose.gcp.almeida@gmail.com"
-
 import logging
 import numpy as np
 from termcolor import colored
@@ -152,86 +147,6 @@ class DataValidator:
                     del self.test_dict[data_stage][key]
         if key in self.test_names:
             self.test_names.remove(key)
-        
-    def check_dtype(self, data: Any) -> Union[bool,None]:
-        """Tests whether ``data.dtype`` is the same as ``self.dtype``.
-
-        Args:
-            data (Any): input data.
-
-        Returns:
-            Union[bool,None]: boolean if ``self.dtype`` is defined (True if 
-                data.dtype == self.dtype and False otherwise). None if 
-                self.dtype is None.
-        """
-        if self.dtype is not None:
-            return data.dtype == self.type
-    
-    def check_type(self, data: Any) -> Union[bool,None]:
-        """Tests whether ``type(data)`` is the same as ``self.type``.
-
-        Args:
-            data (Any): input data.
-
-        Returns:
-            Union[bool,None]: boolean if ``self.type`` is defined (True if 
-                type(data) == self.type and False otherwise). None if 
-                self.type is None.
-        """
-        if self.type is not None:
-            return type(data) == self.type
-    
-    def check_length(self, data: Any) -> Union[bool,None]:
-        """Tests whether ``len(data)`` is the same as ``self.length``.
-
-        Args:
-            data (Any): input data.
-
-        Returns:
-            Union[bool,None]: boolean if ``self.length`` is defined (True if 
-                len(data) == self.length and False otherwise). None if 
-                self.length is None.
-        """
-        if self.length is not None:
-            return len(data) == self.length
-    
-    def check_shape(self, data: Any) -> Union[bool,None]:
-        """Tests whether ``data.shape`` is the same as ``self.shape``.
-
-        Args:
-            data (Any): input data.
-
-        Returns:
-            Union[bool,None]: boolean if ``self.shape`` is defined (True if 
-                data.shape == self.shape and False otherwise). None if 
-                self.shape is None.
-        """
-        if self.shape is not None:
-            print(data.shape)
-            return data.shape == self.shape
-    
-    def check_range(self, data: Any) -> Union[bool,None]:
-        """Tests whether the minimum and maximum values of data (obtained using
-        ``np.min`` and ``np.max``, respectively) correspond to ``self.range[0]`` and
-        ``self.range[1]``.
-        
-        Args:
-            data (Any): input data.
-
-        Returns:
-            Union[bool,None]: boolean if ``self.range`` is defined (True if 
-                the minimum and maximum values of data are within self.range, 
-                False otherwise). None if self.range is None.
-        """
-        if self.range is not None:
-            check = True
-            if self.range[0] is not None:
-                if np.min(data) < self.range[0]:
-                    check = False
-            if self.range[1] is not None:
-                if np.max(data) > self.range[1]:
-                    check = False
-            return check
     
     def validate(self, 
                  data: Any, 
