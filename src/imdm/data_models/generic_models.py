@@ -14,6 +14,8 @@ __email__ = "jose.gcp.almeida@gmail.com"
 import logging
 import numpy as np
 from termcolor import colored
+from ..data_tests import (
+    TestType,TestLength,TestShape,TestRange,TestDType)
 
 from dataclasses import dataclass
 
@@ -72,15 +74,14 @@ class DataValidator:
         self._test_dict = {
             "raw":{},
             "preprocessed_data":{
-                "type": self.check_type
+                "type": TestType(self.type)
             },
             "values":{
-                "length": self.check_length,
-                "shape": self.check_shape,
-                "range": self.check_range,
-                "dtype": self.check_dtype
+                "length": TestLength(self.length),
+                "shape": TestShape(self.shape),
+                "range": TestRange(self.range),
+                "dtype": TestDType(self.dtype)
             },
-            
         }
 
         self.test_names = ["type","length","shape","range","dtype"]
@@ -258,10 +259,11 @@ class DataValidator:
             if result == False:
                 stop = True
             validation_dict[k] = result
-
+        
         if (stop is False) or (strict is False):
             if self.preprocess_fn is not None:
                 data = self.preprocess_fn(data)
+                print(len(data))
             for k in self.test_dict["preprocessed_data"]:
                 result = self.test_dict["preprocessed_data"][k](data)
                 if result == False:
