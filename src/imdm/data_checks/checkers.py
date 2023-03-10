@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Contains generic and specific testing functions for data validators.
+Contains generic and specific checking functions for data validators.
 """
 
 import numpy as np
@@ -11,26 +11,26 @@ from dataclasses import dataclass,field
 from typing import Any,Sequence,Tuple,Union
 
 @dataclass
-class Test(ABC):
+class Check(ABC):
     """
-    Abstract test class. The Test class structure can be defined as follows:
+    Abstract check class. The Check class structure can be defined as follows:
     
     - A ``target`` should be the only input. This variable is the value against
         which the input data will be compared;
     - An ``unpack`` method will be used to convert the input data to the same
-        domain as ``target``. For example, if a type test is setup, ``unpack``
+        domain as ``target``. For example, if a type check is setup, ``unpack``
         should return ``type(input_data)``. Be default this returns the input
         data
     - A ``compare`` method will be used to compare the unpacked data with 
         ``target``. By default this returns whether the unpacked data is 
         the same as ``target`` (equality).
     
-    To implement custom tests, the ``unpack`` and ``compare`` methods should
+    To implement custom checks, the ``unpack`` and ``compare`` methods should
     be redefined.
     
     Two additional class constants - ``_success_msg`` and ``_fail_msg`` - are
     also defined by default (as ""). These messages are helpful if verbosity is
-    an important part of theses tests. If the test succeeds, ``_success_msg`` 
+    an important part of theses checks. If the check succeeds, ``_success_msg`` 
     will be stored as ``self.msg``; otherwise, ``_fail_msg`` will be selected.
     
     We also recommend the definition of a ``check_target`` method that can be
@@ -40,7 +40,7 @@ class Test(ABC):
         target (Any): the value against which the data will be compared.
     """
     target: Any=None
-    msg: str=field(default="Test has not been run",init=False)
+    msg: str=field(default="Check has not been run",init=False)
     _success_msg: str=field(default="",init=False,repr=False)
     _fail_msg: str=field(default="",init=False,repr=False)
     
@@ -71,7 +71,7 @@ class Test(ABC):
         return x
     
     def compare(self, unpacked_x: Any) -> bool:
-        """Performs the test comparison using the unpacked data.
+        """Performs the check comparison using the unpacked data.
 
         Args:
             unpacked_x (Any): unpacked data.
@@ -102,11 +102,11 @@ class Test(ABC):
         return result
 
 @dataclass
-class TestType(Test):
+class CheckType(Check):
     """Checks whether the input data type is the same as ``target``.
 
     Args:
-        Test (Any): target type.
+        target (Any): target type.
     """
     target: Any
     
@@ -129,11 +129,11 @@ class TestType(Test):
         return type(x)
         
 @dataclass
-class TestLength(Test):
+class CheckLength(Check):
     """Checks whether the input data length is the same as ``target``.
 
     Args:
-        Test (int): target length.
+        target (int): target length.
     """
     target: int
     
@@ -167,11 +167,11 @@ class TestLength(Test):
         return len(x)
 
 @dataclass
-class TestDType(Test):
+class CheckDType(Check):
     """Checks whether the input data dtype is the same as ``target``.
 
     Args:
-        Test (int): target dtype.
+        target (int): target dtype.
     """
     target: Any
     
@@ -192,11 +192,11 @@ class TestDType(Test):
         return x.dtype
 
 @dataclass
-class TestShape(Test):
+class CheckShape(Check):
     """Checks whether the input data shape is the same as ``target``.
 
     Args:
-        Test (int): target shape.
+        target (int): target shape.
     """
     target: Sequence[int]
     
@@ -232,14 +232,19 @@ class TestShape(Test):
         Returns:
             Sequence[int]: input data shape.
         """
-        return x.shape
+        sh = x.shape
+        try:
+            sh = type(self.target)(sh)
+        except Exception:
+            pass
+        return sh
 
 @dataclass
-class TestRange(Test):
+class CheckRange(Check):
     """Checks whether the input data values are contained within ``target``.
 
     Args:
-        Test (Tuple[Union[int,float],Union[int,float]]): two integer or float
+        target (Tuple[Union[int,float],Union[int,float]]): two integer or float
             values, used as the maximum and minimum of the range. If these 
             values are ``None``, then it is assumed that there is no bound.
     """

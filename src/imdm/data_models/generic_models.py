@@ -9,8 +9,8 @@ validation.
 import logging
 import numpy as np
 from termcolor import colored
-from ..data_tests import (
-    TestType,TestLength,TestShape,TestRange,TestDType)
+from ..data_checks import (
+    CheckType,CheckLength,CheckShape,CheckRange,CheckDType)
 
 from dataclasses import dataclass
 
@@ -69,13 +69,13 @@ class DataValidator:
         self._test_dict = {
             "raw":{},
             "preprocessed_data":{
-                "type": TestType(self.type)
+                "type": CheckType(self.type)
             },
             "values":{
-                "length": TestLength(self.length),
-                "shape": TestShape(self.shape),
-                "range": TestRange(self.range),
-                "dtype": TestDType(self.dtype)
+                "length": CheckLength(self.length),
+                "shape": CheckShape(self.shape),
+                "range": CheckRange(self.range),
+                "dtype": CheckDType(self.dtype)
             },
         }
 
@@ -151,7 +151,7 @@ class DataValidator:
     def validate(self, 
                  data: Any, 
                  strict: bool=True) -> Dict[str,Union[bool,None]]:
-        """Runs all of the tests in test_dict on the input data. Tests are 
+        """Runs all of the tests in test_dict on the input data. Checks are 
         performed sequentially by data stages and execution halts if a test
         in the previous stage fails. To avoid this behaviour, set ``strict``
         to ``True``.
