@@ -12,7 +12,7 @@
    install
    usage
    unit_tests
-   modules
+   imdm
 
 What's the point
 ----------------
@@ -27,4 +27,4 @@ whether or not a given object or file is compatible with their pipeline.
 
 We are, at the moment, not planning on including any more checks, placing
 the "burden" of developing novel validators and models on users who like
-our flexible ``Test``, ``DataValidator`` and ``DataModel`` classes.
+our flexible ``Check``, ``DataValidator`` and ``DataModel`` classes.

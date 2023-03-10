@@ -22,4 +22,5 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [project.urls]
-homepage = "https://github.com/josegcpa/imdm"  
+homepage = "https://github.com/josegcpa/imdm"
+documentation = "https://imdm.readthedocs.io/"

@@ -7,6 +7,7 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   imdm.data_checks
    imdm.data_models
 
 Module contents

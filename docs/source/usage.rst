@@ -7,17 +7,17 @@ focuses on testing specific conditions given an input data,
 and ``DataModel`` which focuses on validating a sample (composed by
 multiple types of data).
 
-``Test``
-~~~~~~~~
+``Check``
+~~~~~~~~~
 
-A ``Test`` is a generic class that can be used as the base for data
-tests. These data tests, after being defined
-(``test = Test(target="hello")``), can then be called with a given input
-argument (``test("hello)``) and the output (``True``) tells us whether
-the test has passed (``True`` if the test has passed, ``False``
-otherwise).
+A ``Check`` is a generic class that can be used as the base for data
+checks. These data checks, after being defined
+(``check = Check(target="hello")``), can then be called with a given
+input argument (``check("hello)``) and the output (``True``) tells us
+whether the check has passed (``True`` if the check has passed,
+``False`` otherwise).
 
-The test above considers only simple comparison - this is hardly useful
+The check above considers only simple comparison - this is hardly useful
 when we want to perform more complicated comparisons. For example, we
 may want to know if our data is within a given range. To do this, we can
 define novel dataclasses from ``Test`` that perform *exactly* these
@@ -28,7 +28,7 @@ comparisons, by redefining the ``unpack`` and ``compare`` methods:
    from imdm import Test
 
    @dataclass
-   class TestRange(Test):
+   class CheckRange(Test):
        target: Tuple[Union[int,float],Union[int,float]]
        
        def __post_init__(self):
@@ -50,7 +50,7 @@ comparisons, by redefining the ``unpack`` and ``compare`` methods:
            return within_range
 
 By redefining our ``unpack`` and ``compare`` methods, we can ensure that
-the correct tests are performed. These methods are then executed in the
+the correct checks are performed. These methods are then executed in the
 ``__call__`` method of the ``Test`` abstract class:
 
 .. code:: python
