@@ -62,7 +62,7 @@ class DicomFile(DataValidator):
         super().__post_init__()
         self.preprocess_fn = pydicom.dcmread
         self.values_fn = dicom_to_array
-        self.add_test("path",os.path.exists,"raw")
+        self.add_check("path",os.path.exists,"raw")
 
 @dataclass
 class SitkFile(DataValidator):
@@ -87,7 +87,7 @@ class SitkFile(DataValidator):
         self.preprocess_fn = sitk.ReadImage
         self.values_fn = sitk_to_array
 
-        self.add_test("path",os.path.exists,"raw")
+        self.add_check("path",os.path.exists,"raw")
 
 @dataclass
 class NumpyFile(DataValidator):
@@ -111,7 +111,7 @@ class NumpyFile(DataValidator):
         self.preprocess_fn = np.load
         self.values_fn = None
 
-        self.add_test("path",os.path.exists,"raw")
+        self.add_check("path",os.path.exists,"raw")
 
 @dataclass
 class ImageFile(DataValidator):
@@ -135,4 +135,4 @@ class ImageFile(DataValidator):
         self.preprocess_fn = Image.open
         self.values_fn = np.array
 
-        self.add_test("path",os.path.exists,"raw")
+        self.add_check("path",os.path.exists,"raw")

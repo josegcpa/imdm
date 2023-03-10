@@ -10,19 +10,19 @@ The project should be readily instalable with `poetry` (recommended) by running 
 
 ## Usage
 
-Three fundamental abstract classes are used here: `Test`, which focuses on testing specific conditions given an input data, `DataValidator`, which focuses on validating a specific type of data, and `DataModel` which focuses on validating a sample (composed by multiple types of data).
+Three fundamental abstract classes are used here: `Check`, which focuses on checking whether specific conditions are true given an input data, `DataValidator`, which focuses on validating a specific type of data, and `DataModel` which focuses on validating a sample (composed by multiple types of data).
 
-### `Test`
+### `Check`
 
-A `Test` is a generic class that can be used as the base for data tests. These data tests, after being defined (`test = Test(target="hello")`), can then be called with a given input argument (`test("hello)`) and the output (`True`) tells us whether the test has passed (`True` if the test has passed, `False` otherwise). 
+A `Check` is a generic class that can be used as the base for data checks. These data checks, after being defined (`check = Check(target="hello")`), can then be called with a given input argument (`check("hello)`) and the output (`True`) tells us whether the check has passed (`True` if the check has passed, `False` otherwise). 
 
-The test above considers only simple comparison - this is hardly useful when we want to perform more complicated comparisons. For example, we may want to know if our data is within a given range. To do this, we can define novel dataclasses from `Test` that perform *exactly* these comparisons, by redefining the `unpack` and `compare` methods:
+The check above considers only simple comparison - this is hardly useful when we want to perform more complicated comparisons. For example, we may want to know if our data is within a given range. To do this, we can define novel dataclasses from `Test` that perform *exactly* these comparisons, by redefining the `unpack` and `compare` methods:
 
 ```python
 from imdm import Test
 
 @dataclass
-class TestRange(Test):
+class CheckRange(Test):
     target: Tuple[Union[int,float],Union[int,float]]
     
     def __post_init__(self):
@@ -44,7 +44,7 @@ class TestRange(Test):
         return within_range
 ```
 
-By redefining our `unpack` and `compare` methods, we can ensure that the correct tests are performed. These methods are then executed in the `__call__` method of the `Test` abstract class:
+By redefining our `unpack` and `compare` methods, we can ensure that the correct checks are performed. These methods are then executed in the `__call__` method of the `Test` abstract class:
 
 ```python
     def __call__(self, x: Any) -> bool:
@@ -95,7 +95,7 @@ The `DataValidator` method automatically checks for `type`, `length`, `shape` an
 ```python
 import os
 
-data_validator.add_test(key="path",test_fn=os.path.exists,data_stage="raw")
+data_validator.add_check(key="path",check_fn=os.path.exists,data_stage="raw")
 
 output = data_validator.validate("test_string")
 
@@ -106,8 +106,8 @@ print(output)
 
 Easy! All arguments are relatively clear, but `data_stage` is somewhat more ellusive; for this reason I introduce here the concept of three data stages:
 
-* `raw` - the input exactly as it is. This is useful to test whether a file exists.
-* `preprocessed_data` - if a `preprocess_fn` is specified in the `DataValidator` constructor, tests can be applied to these functions. For instance, the `type` check is automatically ran on the `preprocessed_data` stage. 
+* `raw` - the input exactly as it is. This is useful to check whether a file exists.
+* `preprocessed_data` - if a `preprocess_fn` is specified in the `DataValidator` constructor, checks can be applied to these functions. For instance, the `type` check is automatically ran on the `preprocessed_data` stage. 
 * `value_data` - some files (SITK-readable files, for instance) require some non-obvious wrangling before one can actually use their values as `numpy` arrays, which is the assumed format for checking the `range`. This function (`value_fn`) is applied to the output of `preprocess_fn`. 
 
 If no `preprocess_fn` or `value_fn` are supplied, then `preprocessed_data` and `value_fn` will be identical to the input data.

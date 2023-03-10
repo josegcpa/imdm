@@ -27,16 +27,16 @@ class DataValidator:
     methods (type checking, length checking, shape checking and range 
     checking). All validation methods are called using ``self.validate``.
     
-    To add and remove tests, the functions ``self.add_test`` and 
-    ``self.remove_test`` should be used to ensure that everything works. The 
+    To add and remove checks, the functions ``self.add_check`` and 
+    ``self.remove_check`` should be used to ensure that everything works. The 
     ``preprocess_fn`` and ``values_fn`` arguments can be used to preprocess the
-    data before other tests and to obtain values from the data, respectively.
-    To make sure that tests are applied to the correct stages of the data (
-    "raw", "preprocessed_data" and "values"), tests should be annotated with
-    this when being added with the function ``self.add_test``: for instance, if
-    a test ``test_something`` is to be applied to the preprocessed input, then to
-    add this test one should run 
-    ``self.add_test("key",test_something,"preprocessed")``. The value extraction
+    data before other checks and to obtain values from the data, respectively.
+    To make sure that checks are applied to the correct stages of the data (
+    "raw", "preprocessed_data" and "values"), checks should be annotated with
+    this when being added with the function ``self.add_check``: for instance, if
+    a check ``check_something`` is to be applied to the preprocessed input, then to
+    add this check one should run 
+    ``self.add_check("key",check_something,"preprocessed")``. The value extraction
     function (``values_fn``) is applied _after_ the input has been preprocessed
     (if any preprocessing function is provided).
     
@@ -66,7 +66,7 @@ class DataValidator:
     verbose: int = logging.WARNING
 
     def __post_init__(self):
-        self._test_dict = {
+        self._check_dict = {
             "raw":{},
             "preprocessed_data":{
                 "type": CheckType(self.type)
@@ -79,98 +79,98 @@ class DataValidator:
             },
         }
 
-        self.test_names = ["type","length","shape","range","dtype"]
+        self.check_names = ["type","length","shape","range","dtype"]
         self.logger = logging.getLogger('data_validator')
         self.logger.setLevel(self.verbose)
     
     @property
-    def test_dict(self) -> Dict[str,Tuple[Callable,str]]:
-        """Returns the test dictionary.
+    def check_dict(self) -> Dict[str,Tuple[Callable,str]]:
+        """Returns the check dictionary.
 
         Returns:
-            Dict[str,Tuple[Callable,str]]: dictionary with tests and their
+            Dict[str,Tuple[Callable,str]]: dictionary with checks and their
                 respective data stages.
         """
-        return self._test_dict
+        return self._check_dict
     
     def __len__(self) -> int:
-        """Returns the number of tests.
+        """Returns the number of checks.
 
         Returns:
-            int: number of tests.
+            int: number of checks.
         """
-        return len(self._test_dict)
+        return len(self._check_dict)
     
     def __setattr__(self, attr: str, value: Any):
         """Overrinding the default __setattr__ method to prevent direct 
-        definition of ``test_dict``.
+        definition of ``check_dict``.
 
         Args:
             attr (str): attribute name.
             value (Any): attribute value.
 
         Raises:
-            ValueError: raises an error if attr == "test_dict".
+            ValueError: raises an error if attr == "check_dict".
         """
-        if attr == "test_dict":
-            raise ValueError("test_dict cannot be altered. Please use the \
-                add_test and remove_test methods")
+        if attr == "check_dict":
+            raise ValueError("check_dict cannot be altered. Please use the \
+                add_check and remove_check methods")
         else:
             super().__setattr__(attr, value)
 
-    def add_test(self, key: str, test_fn: Callable, data_stage: str):
-        """Adds a test to the test dictionary.
+    def add_check(self, key: str, check_fn: Callable, data_stage: str):
+        """Adds a check to the check dictionary.
 
         Args:
             key (str): name of the dictionary.
-            test_fn (Callable): function corresponding to the test. Must return
+            check_fn (Callable): function corresponding to the check. Must return
                 a boolean (True or False).
-            data_stage (str): data stage for the application of this test.
+            data_stage (str): data stage for the application of this check.
         """
-        if key in self.test_names:
-            raise ValueError(f"'{key}' test is already defined")
-        self._test_dict[data_stage][key] = (test_fn)
+        if key in self.check_names:
+            raise ValueError(f"'{key}' check is already defined")
+        self._check_dict[data_stage][key] = (check_fn)
     
-    def remove_test(self, key: str, data_stage: str=None):
-        """Removes a test.
+    def remove_check(self, key: str, data_stage: str=None):
+        """Removes a check.
 
         Args:
-            key (str): key of the test to be removed.
-            data_stage (str, optional): data stage at which the test is 
+            key (str): key of the check to be removed.
+            data_stage (str, optional): data stage at which the check is 
                 performed. Defaults to None (removes any instances of key).
         """
         if data_stage is not None:
-            del self._test_dict[data_stage][key]
+            del self._check_dict[data_stage][key]
         else:
-            for data_stage in self._test_dict:
-                if key in self.test_dict[data_stage]:
-                    del self.test_dict[data_stage][key]
-        if key in self.test_names:
-            self.test_names.remove(key)
+            for data_stage in self._check_dict:
+                if key in self.check_dict[data_stage]:
+                    del self.check_dict[data_stage][key]
+        if key in self.check_names:
+            self.check_names.remove(key)
     
     def validate(self, 
                  data: Any, 
                  strict: bool=True) -> Dict[str,Union[bool,None]]:
-        """Runs all of the tests in test_dict on the input data. Checks are 
-        performed sequentially by data stages and execution halts if a test
+        """Runs all of the checks in check_dict on the input data. Checks are 
+        performed sequentially by data stages and execution halts if a check
         in the previous stage fails. To avoid this behaviour, set ``strict``
         to ``True``.
 
         Args:
             data (Any): input data.
-            strict (bool, optional): requires that tests at a previous stage
+            strict (bool, optional): requires that checks at a previous stage
                 succeed (no ``False`` values) to execute the next stages. 
                 Defaults to ``True``.
 
         Returns:
             Dict[str,Union[bool,None]]: a dictionary where the keys are the 
-                same as those in ``test_dict`` and the values are the result of
+                same as those in ``check_dict`` and the values are the result of
                 the checks.
         """
         stop = False
-        validation_dict = {k:None for k in self.test_names}
-        for k in self.test_dict["raw"]:
-            result = self.test_dict["raw"][k](data)
+        validation_dict = {k:None for k in self.check_names}
+        for k in self.check_dict["raw"]:
+            result = self.check_dict["raw"][k](data)
             if result == False:
                 stop = True
             validation_dict[k] = result
@@ -179,8 +179,8 @@ class DataValidator:
             if self.preprocess_fn is not None:
                 data = self.preprocess_fn(data)
                 print(len(data))
-            for k in self.test_dict["preprocessed_data"]:
-                result = self.test_dict["preprocessed_data"][k](data)
+            for k in self.check_dict["preprocessed_data"]:
+                result = self.check_dict["preprocessed_data"][k](data)
                 if result == False:
                     stop = True
                 validation_dict[k] = result
@@ -188,8 +188,8 @@ class DataValidator:
         if (stop is False) or (strict is False):
             if self.values_fn is not None:
                 data = self.values_fn(data)
-            for k in self.test_dict["values"]:
-                result = self.test_dict["values"][k](data)
+            for k in self.check_dict["values"]:
+                result = self.check_dict["values"][k](data)
                 if result == False:
                     stop = True
                 validation_dict[k] = result
@@ -299,9 +299,9 @@ class DataModel:
             "data_check": None
         }
         
-        failed_tests = [validation_dict[k] == False for k in validation_dict]
+        failed_checks = [validation_dict[k] == False for k in validation_dict]
         
-        if any(failed_tests) and self.strict == True:
+        if any(failed_checks) and self.strict == True:
             return validation_dict
         
         if self.is_dict == True:
