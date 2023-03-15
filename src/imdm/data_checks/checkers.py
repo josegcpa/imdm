@@ -8,7 +8,7 @@ Contains generic and specific checking functions for data validators.
 import numpy as np
 from abc import ABC
 from dataclasses import dataclass,field
-from typing import Any,Sequence,Tuple,Union
+from typing import Any,Sequence,Tuple,Union,Dict
 
 @dataclass
 class Check(ABC):
@@ -285,13 +285,14 @@ class CheckRange(Check):
         Returns:
             Any: input data minimum and maximum.
         """
-        return np.min(x),np.max(x)
+        return float(np.min(x)),float(np.max(x))
 
-    def compare(self, unpacked_x: Any) -> bool:
-        """_summary_
+    def compare(self, unpacked_x: Tuple[float,float]) -> bool:
+        """Checks whether ``unpacked_x`` is within the values specified in
+        ``target``.
 
         Args:
-            unpacked_x (Any): _description_
+            unpacked_x (Any): minimum and maximum value of ``x``.
 
         Returns:
             bool: True if the minimum of ``x`` is larger than 
@@ -306,3 +307,93 @@ class CheckRange(Check):
             if unpacked_x[1] > self.target[1]:
                 within_range = False
         return within_range
+
+@dataclass
+class CheckDICOMMetadata(Check):
+    """Checks whether a set of metadata tags is equal to specific values.
+
+    Args:
+        target (Dict[str,Any]): dictionary with key-value metadata pairs. Each
+            key should be either a tuple with two strings corresponding to 
+            an hex-encoded integer (i.e. ``("0020","000D")``), an integer or a
+            string corresponding to an attribute in a ``pydicom`` dataset.
+    """
+    target: Dict[str,Any]
+    
+    def __post_init__(self):
+        if hasattr(self,"check_target"):
+            self.check_target()
+        name = self.get_name()
+        self._success_msg = f"Target shape {name} contains input values"
+        self._fail_msg = f"Target shape {name} does not contain input values"
+
+    def check_target(self):
+        """Checks whether the target has been correctly defined.
+
+        Raises:
+            ValueError: raises an error if the input is not a DICOM metadata
+                dictionary with key-value pairs.
+        """
+        error_message = "Input to {} should be {}".format(
+                self.get_name(),"a dictionary of metadata key-value pairs")
+        error_message += "\n"
+        error_message += "The input should have one of the following formats:"
+        error_message += "\n\t - {('0020','000D'):'value'}"
+        error_message += "\n\t - {2097165:'value'}"
+        error_message += "\n\t - {('StudyUID'):'value'}"
+        if self.target is not None:
+            if isinstance(self.target,dict) is False:
+                raise ValueError(error_message)
+            for k in self.target:
+                if isinstance(self.target[k],tuple):
+                    if isinstance(self.target[k][0],str) == False:
+                        raise ValueError(error_message)
+                elif isinstance(self.target[k],(str,int)) == False:
+                    raise ValueError(error_message)
+
+    def unpack(self, x: Any) -> Dict[str,Any]:
+        """Returns the relevante values for the metadata key-value comparison.
+
+        Args:
+            x (Any): input data.
+
+        Returns:
+            Dict[str,Any]: dictionary containing the metadata values to be 
+                compared against the ``target`` specified in the constructor.
+        """
+        comparison_dict = {key:None for key in self.target}
+        for key in self.target:
+            if isinstance(key,tuple):
+                key_ = int("0x" + self.target[0] + self.target[1],16)
+                if key_ in x:
+                    value = x[key_].value
+                    if isinstance(self.target[key],str):
+                        value = str(value)
+                    comparison_dict[key] = value
+            elif isinstance(key,str):
+                if hasattr(x,key):
+                    value = getattr(x,key).value
+                    if isinstance(self.target[key],str):
+                        value = str(value)
+                    comparison_dict[key] = value
+        return comparison_dict
+
+    def compare(self, unpacked_x: Any) -> bool:
+        """Checks whether the values in ``unpacked_x`` are equal to those in
+        ``target``.
+
+        Args:
+            unpacked_x (Any): dictionary with key-value pairs.
+
+        Returns:
+            bool: True if all values in ``unpacked_x`` are identical to those 
+                in ``target``. False otherwise.
+        """
+        all_val_identical = True
+        for key in self.target:
+            if unpacked_x[key] is None:
+                all_val_identical = False
+            else:
+                if unpacked_x[key] != self.target[key]:
+                    all_val_identical = False
+        return all_val_identical
